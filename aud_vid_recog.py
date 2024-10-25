@@ -4,7 +4,7 @@ import os
 import time
 import moviepy.editor as mp
 import shutil
-import logging
+from logging import getLogger
 
 ##Created by Lex Whalen 2/19/21
 class AudioVideoRecognizer():
@@ -13,6 +13,9 @@ class AudioVideoRecognizer():
     def __init__(self):
         self.RECOG = sr.Recognizer()
         self.DICER = AudioDicer()
+    
+        "Set length of time to dice audio by"
+        self.SECONDS = 30
 
         self.CWD = os.getcwd()
         self.TEMP_AUD = os.path.join(self.CWD,"temp_aud")
@@ -20,7 +23,7 @@ class AudioVideoRecognizer():
             shutil.rmtree(self.TEMP_AUD)
         os.makedirs(self.TEMP_AUD)
         
-        self.log = logging.getLogger('subtitle_logging')
+        self.log = getLogger('subtitle_logging')
 
     def trash_file(self,file_path):
         #sends file to trash
@@ -31,14 +34,15 @@ class AudioVideoRecognizer():
 
         #logs splice
         self.log.info("Splicing audio file: %s", file_path)
-        SECONDS = 30
-        self.DICER.multiple_split(file_path,SECONDS)
+        
+        self.DICER.multiple_split(file_path,self.SECONDS)
 
     def transcribe(self,file_name,lang):
         """Transcribes the audio. Returns a list of the words found in that audio segment."""
 
-        self.log.info("Transcribing...")
+        self.log.info("Transcribing {}...".format(os.path.basename(file_name)))
         with sr.WavFile(file_name) as source: #use f.wav as aud source
+            #TODO Insert timestamping here
             audio = self.RECOG.record(source) #get aud data
             try:
                 #first try is to see if google recognizes that it is speech
@@ -97,8 +101,6 @@ class AudioVideoRecognizer():
 
                 #append the words we found in that audio clip to the master_words for use in creating .txt file
                 master_words += words
-            
-
 
             #throw away the temps 
             for f in os.listdir(self.TEMP_AUD):

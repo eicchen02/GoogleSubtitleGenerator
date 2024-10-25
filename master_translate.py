@@ -19,7 +19,6 @@ class MasterTranslate():
         ### used for logging 
         self.log = log_init(log_to_console=1)
 
-    
     def show_lang_options(self):
         print("See the following link for all language codes:")
         print("https://cloud.google.com/speech-to-text/docs/languages")

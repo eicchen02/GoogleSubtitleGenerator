@@ -2,11 +2,18 @@ import logging
 import os
 from datetime import datetime
 
+#Global variable for logger
+LOGGER = logging.getLogger(__name__)
+
+#Global flag to see if logger is initialized
+LOGGER_INIT_FLAG = 0
+
 def log_init(log_to_console):
 ### log_to_console is a bool to determine whether to log output to the console, will log to file by default
-    logger = logging.getLogger(__name__)
-    formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+###? Only call once to initialize logging function, to return logger in other files use getLogger('subtitle_logging') from Logging library
+    global LOGGER, LOGGER_INIT_FLAG
 
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(message)s')
     log_make_dir()
 
     logging.basicConfig(
@@ -20,13 +27,11 @@ def log_init(log_to_console):
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.DEBUG)
         console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-        
-    return logger
+        LOGGER.addHandler(console_handler)
+    
+    LOGGER_INIT_FLAG = 1
 
-# Returns logger to be used with logging functions
-def get_logger():
-    return logger
+    return LOGGER
 
 def log_make_dir():
     CWD = os.getcwd()

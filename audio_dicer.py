@@ -2,6 +2,7 @@ import os
 import pydub
 from pydub import AudioSegment
 import math
+from logging import getLogger
 
 ##Created by Lex Whalen 2/19/21
 class AudioDicer():
@@ -10,6 +11,7 @@ class AudioDicer():
     def __init__(self):
         self.CWD = os.getcwd()
         self.TEMP_SPLIT_AUD = os.path.join(self.CWD,"temp_split_aud")
+        self.log = getLogger('subtitle_logging')
 
     def get_aud(self, raw_file):
         #returns an AudioSegment representation of your audio
@@ -64,11 +66,11 @@ class AudioDicer():
     def multiple_split(self,raw_file,sec_per_split):
         #creates multiple splits of the audio file
 
-
         aud_seg = self.get_aud(raw_file)
 
         #get the total seconds as an upper bound
         total_secs = math.ceil(self.get_duration(aud_seg))
+        self.log.info("Total Length of {}: {} seconds".format(os.path.basename(raw_file), total_secs))
 
         cut_iter = 0
 
