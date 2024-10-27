@@ -34,9 +34,14 @@ class MasterTranslate():
 
 if __name__ == "__main__":
 
+    import time
+    start_time = time.time()
+
     MT = MasterTranslate()
 
     YOUR_LANG = "ja-JP"
     YOUR_FLDR = "YOUR_SHOW_FLDR"
 
     MT.scrape_show(YOUR_LANG,YOUR_FLDR)
+
+    print("Total Run Time: %ss" %(time.time() - start_time))

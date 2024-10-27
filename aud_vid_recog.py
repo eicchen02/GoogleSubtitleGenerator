@@ -41,14 +41,13 @@ class AudioVideoRecognizer():
         """Transcribes the audio. Returns a list of the words found in that audio segment."""
 
         self.log.info("Transcribing {}...".format(os.path.basename(file_name)))
-        with sr.WavFile(file_name) as source: #use f.wav as aud source
+        with sr.AudioFile(file_name) as source: #use f.wav as aud source
             #TODO Insert timestamping here
-            audio = self.RECOG.record(source) #get aud data
             try:
                 #first try is to see if google recognizes that it is speech
                 try:
                     #second try is to see if it can make the speech out
-                    words = [i for i in (self.RECOG.recognize_google(audio,language = lang)).split()]
+                    words = [i for i in (self.RECOG.recognize_google(source,language = lang)).split()]
                     
                     #return the list of words found from GT
                     return words
