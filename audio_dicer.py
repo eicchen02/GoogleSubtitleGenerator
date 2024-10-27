@@ -11,22 +11,11 @@ class AudioDicer():
     def __init__(self):
         self.CWD = os.getcwd()
         self.TEMP_SPLIT_AUD = os.path.join(self.CWD,"temp_split_aud")
+
+        #amount to slow audio down by
+        self.RATE = 0.9 
+
         self.log = getLogger('subtitle_logging')
-
-    def get_aud(self, raw_file):
-        #returns an AudioSegment representation of your audio
-
-
-        #You could also change the rate of the audio as you read the file. I have included the code for that below.
-        
-        #RATE is the rate of the audio. For instance, 0.5 is half the speed. 
-        #Play around with this to see if it helps GT recognize the audio.
-        #RATE = 0.9
-
-        sound =  AudioSegment.from_file(raw_file)
-        #sound.set_frame_rate(int(sound.frame_rate * RATE))
-
-        return sound
 
     def get_duration(self,aud_segment):
         
@@ -48,37 +37,23 @@ class AudioDicer():
         # know how to play audio at standard frame rate (like 44.1k)
         return sound_with_altered_frame_rate.set_frame_rate(sound.frame_rate)
 
+    def slow_audio(self,audio, slow_percent):
 
-    def single_split(self,aud_segment,from_sec,to_sec,split_fn):
-
-        #aud_segment does stuff in milliseconds, so multiply to get to seconds.
-        t1 = from_sec * 1000 
-        t2 = to_sec * 1000
-
-        #split the audio from t1 to t2
-        split_aud = aud_segment[t1:t2]
-        
         #slow the audio down 
-        slowed = self.speed_change(split_aud,0.9)
+        slowed = self.speed_change(audio, slow_percent)
 
-        slowed.export(split_fn,format="wav")
+        return slowed
 
-    def multiple_split(self,raw_file,sec_per_split):
-        #creates multiple splits of the audio file
-
-        aud_seg = self.get_aud(raw_file)
+    def convert_wav(self, raw_file):
+        audio =  AudioSegment.from_file(raw_file)
 
         #get the total seconds as an upper bound
-        total_secs = math.ceil(self.get_duration(aud_seg))
+        total_secs = math.ceil(self.get_duration(audio))
         self.log.info("Total Length of {}: {} seconds".format(os.path.basename(raw_file), total_secs))
 
-        cut_iter = 0
-
-        for i in range(0,total_secs,sec_per_split):
-
-            #left pad zeros to loop through file names correctly
-            split_fn = "{}-{}.wav".format(raw_file.split(".wav")[0],str(cut_iter).zfill(5)) #create file name for the split up aud
-
-            self.single_split(aud_seg,i,i+sec_per_split,split_fn)
-            cut_iter +=1
+        #slow audio by self.RATE
+        audio_export = self.slow_audio(audio, self.RATE)
+        
+        audio_export_path = raw_file
+        audio_export.export(audio_export_path,format="wav")
 

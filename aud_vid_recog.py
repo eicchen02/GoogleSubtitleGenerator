@@ -29,38 +29,33 @@ class AudioVideoRecognizer():
         #sends file to trash
         os.remove(file_path)
 
-    def slice_aud(self,file_path):
-        """Dices audio into SECONDS seconds. I did 30 in the video, but 45 works better."""
-
-        #logs splice
-        self.log.info("Splicing audio file: %s", file_path)
-        
-        self.DICER.multiple_split(file_path,self.SECONDS)
-
     def transcribe(self,file_name,lang):
         """Transcribes the audio. Returns a list of the words found in that audio segment."""
 
         self.log.info("Transcribing {}...".format(os.path.basename(file_name)))
-        with sr.AudioFile(file_name) as source: #use f.wav as aud source
+        master_words = []
+        with sr.WavFile(file_name) as source: #use f.wav as aud source
             #TODO Insert timestamping here
-            try:
-                #first try is to see if google recognizes that it is speech
+            #get aud data, uses record to parse for every self.SECONDS (currently 30)
+            while audio := self.RECOG.record(source, self.SECONDS):                  
                 try:
-                    #second try is to see if it can make the speech out
-                    words = [i for i in (self.RECOG.recognize_google(source,language = lang)).split()]
-                    
-                    #return the list of words found from GT
-                    return words
+                    #first try is to see if google recognizes that it is speech
+                    try:
+                        #second try is to see if it can make the speech out
+                        words = [i for i in self.RECOG.recognize_google(audio,language = lang).split()]
+                        master_words += words
+                        #TODO Come back later to parse api_call, it may have timestamps?
+                        # api_call = self.RECOG.recognize_google(audio,language = lang, show_all = True)
 
-                except Exception as e:
-                    #found no words in the audio
-                    #return an empty list
+                    except Exception as e:
+                        #no more words found in audio, return current list of words found so far.
 
-                    return []
+                        return master_words
 
-            except LookupError: #unintelligible
-                print("Could not understand audio")
+                except LookupError: #unintelligible
+                    print("Could not understand audio")
 
+    # 
     def from_file(self,f,lang, isVideo = False):
 
         if not isVideo:
@@ -80,26 +75,10 @@ class AudioVideoRecognizer():
             clip = mp.VideoFileClip(f)
             clip.audio.write_audiofile(aud_path_abs)
 
-            #cut the clip into 30 second pieces so google can work with them
+            self.DICER.convert_wav(aud_path_abs)
 
-            self.slice_aud(aud_path_abs)
-            
-            #throw away the base audio
-            self.trash_file(aud_path_abs)
-
-            #loop through the split audio, append to a list
-            master_words = []
-
-            for f in os.listdir(self.TEMP_AUD):
-                f_path = os.path.join(self.TEMP_AUD,f)
-
-                words = self.transcribe(f_path,lang)
-
-                #to prevent google from shutting us down
-                time.sleep(2)
-
-                #append the words we found in that audio clip to the master_words for use in creating .txt file
-                master_words += words
+            #self.transcribe returns a list of words found
+            words = self.transcribe(aud_path_abs,lang)
 
             #throw away the temps 
             for f in os.listdir(self.TEMP_AUD):
@@ -109,7 +88,7 @@ class AudioVideoRecognizer():
 
             
             #finally return words
-            return master_words
+            return words
 
 
 
