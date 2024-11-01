@@ -39,24 +39,25 @@ class AudioVideoRecognizer():
             #? idk why this was originally decided to be 30s
 
             #get aud data, uses record to parse for every self.SECONDS (currently 30)
-            remaining_duration = source.DURATION
-            while remaining_duration > 0:
-                old_remaining_duration = source.DURATION - remaining_duration
+            current_time = 0
+            while current_time < source.DURATION:
+                old_time = current_time
                 audio_length = 0
-                if remaining_duration >= self.SECONDS:
+                if current_time + self.SECONDS < source.DURATION:
                     audio_length = self.SECONDS
-                else: 
-                    audio_length = remaining_duration
-                remaining_duration = round(remaining_duration - audio_length, 2)
+                else:
+                    audio_length = source.DURATION - current_time
+
+                current_time = round(current_time + audio_length, 2)
 
                 audio = self.RECOG.record(source, audio_length)   
 
-                self.log.info("Current Slice: {} - {}".format(old_remaining_duration, source.DURATION - remaining_duration))
+                self.log.info("Current Slice: {} - {}".format(old_time, current_time))
                 try:
                     #try to see if it can make the speech out
                     words = self.RECOG.recognize_google(audio,language = lang).split()
                     master_words += words
-                    # print(words)
+                    print(words)
 
                     #TODO Come back later to parse api_call, it may have timestamps?
                     # api_call = self.RECOG.recognize_google(audio,language = lang, show_all = True)
