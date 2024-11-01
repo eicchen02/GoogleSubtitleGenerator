@@ -39,9 +39,9 @@ if __name__ == "__main__":
 
     MT = MasterTranslate()
 
-    YOUR_LANG = "ja-JP"
+    YOUR_LANG = "en-US"
     YOUR_FLDR = "YOUR_SHOW_FLDR"
 
     MT.scrape_show(YOUR_LANG,YOUR_FLDR)
 
-    print("Total Run Time: %ss" %(time.time() - start_time))
+    print("Total Run Time: {}s".format(round(time.time() - start_time, 3)))

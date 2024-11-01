@@ -13,7 +13,7 @@ class AudioDicer():
         self.TEMP_SPLIT_AUD = os.path.join(self.CWD,"temp_split_aud")
 
         #amount to slow audio down by
-        self.RATE = 0.9 
+        self.RATE = 1
 
         self.log = getLogger('subtitle_logging')
 
@@ -44,16 +44,15 @@ class AudioDicer():
 
         return slowed
 
-    def convert_wav(self, raw_file):
-        audio =  AudioSegment.from_file(raw_file)
+    def convert_wav(self, file_input, file_output):
+        audio =  AudioSegment.from_file(file_input)
 
         #get the total seconds as an upper bound
         total_secs = math.ceil(self.get_duration(audio))
-        self.log.info("Total Length of {}: {} seconds".format(os.path.basename(raw_file), total_secs))
+        self.log.info("Total Length of {}: {} seconds".format(os.path.basename(file_input), total_secs))
 
         #slow audio by self.RATE
         audio_export = self.slow_audio(audio, self.RATE)
         
-        audio_export_path = raw_file
-        audio_export.export(audio_export_path,format="wav")
+        audio_export.export(file_output,format="wav")
 
