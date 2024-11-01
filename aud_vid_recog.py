@@ -41,7 +41,7 @@ class AudioVideoRecognizer():
             #get aud data, uses record to parse for every self.SECONDS (currently 30)
             remaining_duration = source.DURATION
             while remaining_duration > 0:
-                old_remaining_duration = remaining_duration
+                old_remaining_duration = source.DURATION - remaining_duration
                 audio_length = 0
                 if remaining_duration >= self.SECONDS:
                     audio_length = self.SECONDS
@@ -51,7 +51,7 @@ class AudioVideoRecognizer():
 
                 audio = self.RECOG.record(source, audio_length)   
 
-                self.log.info("Current Slice: {} - {}".format(old_remaining_duration, remaining_duration))
+                self.log.info("Current Slice: {} - {}".format(old_remaining_duration, source.DURATION - remaining_duration))
                 try:
                     #try to see if it can make the speech out
                     words = self.RECOG.recognize_google(audio,language = lang).split()
